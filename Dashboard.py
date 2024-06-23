@@ -176,22 +176,50 @@ def plot_graph(data, feature_x, feature_y, plot_type):
             sns.heatmap(data[[feature_x, feature_y]].corr(), annot=True, cmap='coolwarm')
             plt.title(f'Heatmap of {feature_x} vs {feature_y}')
             st.pyplot(plt)
-        elif pd.api.types.CategoricalDtype(data[feature_x]) and pd.api.types.is_categorical_dtype(data[feature_y]):
+        elif pd.api.types.CategoricalDtype(data[feature_x]) and pd.api.types.CategoricalDtype(data[feature_y]):
             st.error("Heatmap requires both selected features to be numeric or both to be categorical.")
         else:
             st.error("Heatmap requires both selected features to be numeric or both to be categorical.")
 
+
     elif plot_type == 'Pie Chart':
+
         st.subheader(f"Pie Chart of {feature_x} by {feature_y}")
-        unique_values = data[feature_x].unique()
-        value_selection = st.selectbox(f"Select {feature_x} value", unique_values)
-        if value_selection:
-            subset = data[data[feature_x] == value_selection]
-            plt.figure(figsize=(6, 6))
-            plt.pie(subset[feature_y].value_counts(), labels=subset[feature_y].value_counts().index, autopct='%1.1f%%',
-                    startangle=140)
-            plt.title(f'{feature_x} {value_selection} distribution by {feature_y}')
-            st.pyplot(plt)
+
+        # Ensure feature_x and feature_y exist in the data
+
+        if feature_x in data.columns and feature_y in data.columns:
+
+            unique_values = data[feature_x].unique()
+
+            value_selection = st.selectbox(f"Select {feature_x} value", unique_values)
+
+            if value_selection:
+
+                subset = data[data[feature_x] == value_selection]
+
+                if not subset.empty:
+
+                    if st.button('Plot Pie Chart'):
+                        plt.figure(figsize=(6, 6))
+
+                        plt.pie(subset[feature_y].value_counts(),
+
+                                labels=subset[feature_y].value_counts().index,
+
+                                autopct='%1.1f%%', startangle=140)
+
+                        plt.title(f'{feature_x} {value_selection} distribution by {feature_y}')
+
+                        st.pyplot(plt)
+
+            else:
+
+                st.warning(f"No data available for the selected {feature_x} value: {value_selection}")
+
+    else:
+
+        st.error(f"Selected features {feature_x} and/or {feature_y} do not exist in the data.")
 
 
 # Streamlit app
